@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Task Manager</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: system-ui, sans-serif;
+      background: #f5f5f5;
+      color: #222;
+      padding: 2rem;
+    }
+
+    h1 { font-size: 1.5rem; margin-bottom: 2rem; }
+    h2 { font-size: 1.1rem; margin-bottom: 1rem; color: #444; }
+
+    .card {
+      background: #fff;
+      border: 1px solid #ddd;
+      border-radius: 6px;
+      padding: 1.25rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; }
+
+    label { display: block; font-size: 0.85rem; font-weight: 600; margin-bottom: 0.25rem; }
+
+    input, select, textarea {
+      width: 100%;
+      padding: 0.5rem;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      font-size: 0.9rem;
+      margin-bottom: 0.75rem;
+    }
+
+    textarea { resize: vertical; min-height: 70px; }
+
+    button {
+      padding: 0.5rem 1.1rem;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 0.875rem;
+      font-weight: 600;
+    }
+
+    .btn-primary { background: #2563eb; color: #fff; }
+    .btn-primary:hover { background: #1d4ed8; }
+    .btn-danger  { background: #dc2626; color: #fff; font-size: 0.8rem; padding: 0.3rem 0.6rem; }
+    .btn-danger:hover  { background: #b91c1c; }
+    .btn-secondary { background: #e5e7eb; color: #222; }
+    .btn-secondary:hover { background: #d1d5db; }
+
+    #suggest-result {
+      margin-top: 1rem;
+      background: #f0f9ff;
+      border: 1px solid #bae6fd;
+      border-radius: 4px;
+      padding: 0.75rem;
+      font-size: 0.875rem;
+      display: none;
+    }
+
+    #suggest-result pre { white-space: pre-wrap; word-break: break-word; }
+
+    table { width: 100%; border-collapse: collapse; font-size: 0.875rem; }
+    th { text-align: left; padding: 0.5rem 0.75rem; background: #f9fafb; border-bottom: 2px solid #e5e7eb; }
+    td { padding: 0.5rem 0.75rem; border-bottom: 1px solid #f0f0f0; vertical-align: middle; }
+    tr:last-child td { border-bottom: none; }
+
+    .badge {
+      display: inline-block;
+      padding: 0.15rem 0.5rem;
+      border-radius: 999px;
+      font-size: 0.75rem;
+      font-weight: 600;
+    }
+    .priority-LOW    { background: #dcfce7; color: #166534; }
+    .priority-MEDIUM { background: #fef9c3; color: #854d0e; }
+    .priority-HIGH   { background: #fee2e2; color: #991b1b; }
+    .status-TODO       { background: #e0e7ff; color: #3730a3; }
+    .status-IN_PROGRESS { background: #ffedd5; color: #9a3412; }
+    .status-DONE       { background: #dcfce7; color: #166534; }
+
+    #message {
+      margin-bottom: 1rem;
+      padding: 0.6rem 1rem;
+      border-radius: 4px;
+      font-size: 0.875rem;
+      display: none;
+    }
+    .msg-ok  { background: #dcfce7; color: #166534; border: 1px solid #86efac; }
+    .msg-err { background: #fee2e2; color: #991b1b; border: 1px solid #fca5a5; }
+
+    #empty-state { text-align: center; color: #888; padding: 2rem 0; font-size: 0.9rem; }
+  </style>
+</head>
+<body>
+
+<h1>Task Manager</h1>
+
+<div id="message"></div>
+
+<div class="grid-2">
+
+  <!-- AI Suggest -->
+  <div class="card">
+    <h2>AI Task Suggest</h2>
+    <label for="suggest-input">Describe the task in plain language</label>
+    <textarea id="suggest-input" placeholder='e.g. "remind me to submit the quarterly report before Friday"'></textarea>
+    <button class="btn-primary" onclick="suggestTask()">Suggest Task</button>
+
+    <div id="suggest-result">
+      <strong>Suggested task:</strong>
+      <pre id="suggest-json"></pre>
+      <button class="btn-secondary" style="margin-top:0.5rem" onclick="useSuggestion()">Use this suggestion</button>
+    </div>
+  </div>
+
+  <!-- Create Task -->
+  <div class="card">
+    <h2>Create Task</h2>
+    <label for="title">Title <span style="color:red">*</span></label>
+    <input type="text" id="title" placeholder="Task title" />
+
+    <label for="description">Description</label>
+    <input type="text" id="description" placeholder="Optional description" />
+
+    <label for="dueDate">Due Date</label>
+    <input type="date" id="dueDate" />
+
+    <label for="priority">Priority</label>
+    <select id="priority">
+      <option value="LOW">Low</option>
+      <option value="MEDIUM" selected>Medium</option>
+      <option value="HIGH">High</option>
+    </select>
+
+    <label for="status">Status</label>
+    <select id="status">
+      <option value="TODO" selected>To Do</option>
+      <option value="IN_PROGRESS">In Progress</option>
+      <option value="DONE">Done</option>
+    </select>
+
+    <button class="btn-primary" onclick="createTask()">Create Task</button>
+  </div>
+
+</div>
+
+<!-- Task List -->
+<div class="card">
+  <h2>All Tasks</h2>
+  <table id="task-table">
+    <thead>
+      <tr>
+        <th>#</th>
+        <th>Title</th>
+        <th>Description</th>
+        <th>Due Date</th>
+        <th>Priority</th>
+        <th>Status</th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody id="task-body"></tbody>
+  </table>
+  <div id="empty-state" style="display:none">No tasks yet. Create one above.</div>
+</div>
+
+<script>
+  let lastSuggestion = null;
+
+  async function loadTasks() {
+    try {
+      const res = await fetch('/tasks');
+      const tasks = await res.json();
+      renderTasks(tasks);
+    } catch (e) {
+      showMessage('Failed to load tasks: ' + e.message, 'err');
+    }
+  }
+
+  function renderTasks(tasks) {
+    const body = document.getElementById('task-body');
+    const empty = document.getElementById('empty-state');
+    body.innerHTML = '';
+
+    if (!tasks.length) {
+      empty.style.display = 'block';
+      return;
+    }
+    empty.style.display = 'none';
+
+    tasks.forEach(t => {
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td>${t.id}</td>
+        <td><strong>${esc(t.title)}</strong></td>
+        <td>${esc(t.description || '—')}</td>
+        <td>${t.dueDate || '—'}</td>
+        <td><span class="badge priority-${t.priority}">${t.priority}</span></td>
+        <td><span class="badge status-${t.status}">${t.status.replace('_', ' ')}</span></td>
+        <td><button class="btn-danger" onclick="deleteTask(${t.id})">Delete</button></td>
+      `;
+      body.appendChild(tr);
+    });
+  }
+
+  async function createTask() {
+    const title = document.getElementById('title').value.trim();
+    if (!title) { showMessage('Title is required.', 'err'); return; }
+
+    const body = {
+      title,
+      description: document.getElementById('description').value.trim() || null,
+      dueDate:     document.getElementById('dueDate').value     || null,
+      priority:    document.getElementById('priority').value,
+      status:      document.getElementById('status').value,
+    };
+
+    try {
+      const res = await fetch('/tasks', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
+      });
+      if (!res.ok) {
+        const err = await res.json();
+        showMessage(err.message, 'err');
+        return;
+      }
+      showMessage('Task created.', 'ok');
+      clearForm();
+      loadTasks();
+    } catch (e) {
+      showMessage('Request failed: ' + e.message, 'err');
+    }
+  }
+
+  async function deleteTask(id) {
+    try {
+      const res = await fetch(`/tasks/${id}`, { method: 'DELETE' });
+      if (!res.ok) {
+        const err = await res.json();
+        showMessage(err.message, 'err');
+        return;
+      }
+      loadTasks();
+    } catch (e) {
+      showMessage('Delete failed: ' + e.message, 'err');
+    }
+  }
+
+  async function suggestTask() {
+    const description = document.getElementById('suggest-input').value.trim();
+    if (!description) { showMessage('Enter a description first.', 'err'); return; }
+
+    const resultBox  = document.getElementById('suggest-result');
+    const jsonEl     = document.getElementById('suggest-json');
+    resultBox.style.display = 'none';
+
+    try {
+      const res = await fetch('/tasks/suggest', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ description }),
+      });
+      if (!res.ok) {
+        const err = await res.json();
+        showMessage(err.message, 'err');
+        return;
+      }
+      lastSuggestion = await res.json();
+      jsonEl.textContent = JSON.stringify(lastSuggestion, null, 2);
+      resultBox.style.display = 'block';
+    } catch (e) {
+      showMessage('Request failed: ' + e.message, 'err');
+    }
+  }
+
+  function useSuggestion() {
+    if (!lastSuggestion) return;
+    document.getElementById('title').value       = lastSuggestion.title       || '';
+    document.getElementById('description').value = lastSuggestion.description || '';
+    document.getElementById('dueDate').value     = lastSuggestion.dueDate     || '';
+    document.getElementById('priority').value    = lastSuggestion.priority    || 'MEDIUM';
+    document.getElementById('status').value      = lastSuggestion.status      || 'TODO';
+    document.getElementById('suggest-result').style.display = 'none';
+    showMessage('Suggestion loaded into the form. Review and submit.', 'ok');
+  }
+
+  function clearForm() {
+    ['title', 'description', 'dueDate'].forEach(id => document.getElementById(id).value = '');
+    document.getElementById('priority').value = 'MEDIUM';
+    document.getElementById('status').value   = 'TODO';
+  }
+
+  function showMessage(text, type) {
+    const el = document.getElementById('message');
+    el.textContent = text;
+    el.className = type === 'ok' ? 'msg-ok' : 'msg-err';
+    el.style.display = 'block';
+    setTimeout(() => el.style.display = 'none', 4000);
+  }
+
+  function esc(str) {
+    return String(str)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;');
+  }
+
+  loadTasks();
+</script>
+</body>
+</html>

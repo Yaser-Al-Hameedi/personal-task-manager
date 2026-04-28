@@ -1,0 +1,16 @@
+/Users/yaseral-hameedi/Desktop/task-manager/personal-task-manager/src/main/java/com/taskmanager/app/TaskManagerApplication.java
+/Users/yaseral-hameedi/Desktop/task-manager/personal-task-manager/src/main/java/com/taskmanager/app/config/AppConfig.java
+/Users/yaseral-hameedi/Desktop/task-manager/personal-task-manager/src/main/java/com/taskmanager/app/controller/TaskController.java
+/Users/yaseral-hameedi/Desktop/task-manager/personal-task-manager/src/main/java/com/taskmanager/app/dto/ErrorResponse.java
+/Users/yaseral-hameedi/Desktop/task-manager/personal-task-manager/src/main/java/com/taskmanager/app/dto/SuggestRequest.java
+/Users/yaseral-hameedi/Desktop/task-manager/personal-task-manager/src/main/java/com/taskmanager/app/dto/TaskRequest.java
+/Users/yaseral-hameedi/Desktop/task-manager/personal-task-manager/src/main/java/com/taskmanager/app/dto/TaskResponse.java
+/Users/yaseral-hameedi/Desktop/task-manager/personal-task-manager/src/main/java/com/taskmanager/app/dto/TaskSuggestion.java
+/Users/yaseral-hameedi/Desktop/task-manager/personal-task-manager/src/main/java/com/taskmanager/app/exception/GlobalExceptionHandler.java
+/Users/yaseral-hameedi/Desktop/task-manager/personal-task-manager/src/main/java/com/taskmanager/app/exception/TaskNotFoundException.java
+/Users/yaseral-hameedi/Desktop/task-manager/personal-task-manager/src/main/java/com/taskmanager/app/model/Priority.java
+/Users/yaseral-hameedi/Desktop/task-manager/personal-task-manager/src/main/java/com/taskmanager/app/model/Status.java
+/Users/yaseral-hameedi/Desktop/task-manager/personal-task-manager/src/main/java/com/taskmanager/app/model/Task.java
+/Users/yaseral-hameedi/Desktop/task-manager/personal-task-manager/src/main/java/com/taskmanager/app/repository/TaskRepository.java
+/Users/yaseral-hameedi/Desktop/task-manager/personal-task-manager/src/main/java/com/taskmanager/app/service/OpenAiService.java
+/Users/yaseral-hameedi/Desktop/task-manager/personal-task-manager/src/main/java/com/taskmanager/app/service/TaskService.java
