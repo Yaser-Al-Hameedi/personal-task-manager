@@ -40,7 +40,7 @@ public class OpenAiService {
                 Today's date is %s.
                 Respond with a JSON object containing exactly these fields:
                 - title: string (concise task title, required)
-                - description: string (brief elaboration, or null if nothing to add)
+                - description: string (a brief, helpful elaboration of the task — always provide one, never null)
                 - dueDate: string in YYYY-MM-DD format, or null if no date is mentioned
                 - priority: one of "LOW", "MEDIUM", "HIGH" — infer from urgency cues in the description
                 - status: always "TODO"
